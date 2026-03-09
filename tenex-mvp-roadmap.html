@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tenex — MVP Roadmap</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600;1,700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a0a;--surface:#111;--surface-2:#161616;--surface-3:#1c1c1c;
+  --card:#131313;--card-h:#1a1a1a;--border:#222;--border-2:#2a2a2a;
+  --white:#fff;--text:#f5f5f5;--text-2:#ccc;--muted:#999;--dim:#666;--ghost:#444;--faint:#2a2a2a;
+  --accent:#c8ff00;--accent-d:rgba(200,255,0,.08);
+  --green:#34d399;--green-d:rgba(52,211,153,.08);
+  --rose:#f472b6;--rose-d:rgba(244,114,182,.06);
+  --cyan:#22d3ee;--cyan-d:rgba(34,211,238,.06);
+  --amber:#fbbf24;--amber-d:rgba(251,191,36,.08);
+  --sans:'Manrope',system-ui,sans-serif;
+  --serif:'Playfair Display',Georgia,serif;
+  --mono:'IBM Plex Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+::selection{background:var(--accent);color:var(--bg)}
+.pad{padding-left:clamp(24px,5vw,64px);padding-right:clamp(24px,5vw,64px)}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;height:60px;display:flex;align-items:center;justify-content:space-between;background:rgba(10,10,10,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+.n-logo{font-weight:800;font-size:18px;letter-spacing:-.5px}
+.n-right{display:flex;align-items:center;gap:20px}
+.n-link{font-size:13px;color:var(--muted);text-decoration:none;font-weight:500;transition:color .2s}
+.n-link:hover{color:var(--white)}
+.n-cta{font-size:12px;font-weight:600;color:var(--bg);background:var(--white);padding:8px 20px;border-radius:100px;text-decoration:none;transition:background .2s}
+.n-cta:hover{background:var(--accent)}
+
+/* HERO */
+.hero{padding-top:150px;padding-bottom:80px;max-width:820px}
+.hero h1{font-size:clamp(36px,5.5vw,62px);font-weight:800;line-height:1.08;letter-spacing:-2px;margin-bottom:28px}
+.hero h1 em{font-family:var(--serif);font-style:italic;font-weight:700}
+.hero-body{font-size:17px;color:var(--muted);line-height:1.8;max-width:600px}
+.hero-body strong{color:var(--text-2);font-weight:600}
+
+/* MARQUEE */
+.mq{border-top:1px solid var(--border);border-bottom:1px solid var(--border);overflow:hidden;padding:14px 0;margin-top:60px}
+.mq-track{display:flex;animation:mqScroll 22s linear infinite;width:max-content}
+.mq-item{font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--ghost);white-space:nowrap;padding:0 32px}
+.mq-dot{display:inline-block;width:4px;height:4px;background:var(--ghost);border-radius:50%;margin-right:28px;vertical-align:middle}
+@keyframes mqScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* ═══ EXECUTIVE SUMMARY — the leadership layer ═══ */
+.exec-section{padding-top:80px;padding-bottom:0}
+.sec-label{font-size:13px;font-weight:500;color:var(--muted);margin-bottom:16px}
+.sec-h{font-size:clamp(28px,3.8vw,44px);font-weight:800;letter-spacing:-1px;line-height:1.15;margin-bottom:16px}
+.sec-h em{font-family:var(--serif);font-style:italic;font-weight:700}
+.sec-sub{font-size:15px;color:var(--dim);line-height:1.7;max-width:560px}
+
+/* Big metric cards — what leadership sees first */
+.exec-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-radius:16px;overflow:hidden;margin-top:48px}
+.exec-card{background:var(--card);padding:40px 32px}
+.ec-label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:1.5px;color:var(--dim);margin-bottom:12px}
+.ec-value{font-size:44px;font-weight:800;letter-spacing:-1.5px;line-height:1;margin-bottom:6px}
+.ec-desc{font-size:13px;color:var(--muted);line-height:1.6}
+
+/* ═══ VISUAL TIMELINE — high-level, scannable ═══ */
+.timeline{margin-top:80px;position:relative}
+.tl-track{display:flex;align-items:stretch;gap:0;border:1px solid var(--border);border-radius:16px;overflow:hidden}
+.tl-phase{flex:1;position:relative;padding:36px 24px 28px;background:var(--card);border-right:1px solid var(--border);cursor:pointer;transition:background .2s}
+.tl-phase:last-child{border-right:none}
+.tl-phase:hover{background:var(--card-h)}
+.tl-bar{position:absolute;top:0;left:0;right:0;height:4px;transition:height .25s}
+.tl-phase:hover .tl-bar{height:6px}
+.tl-num{font-size:11px;font-weight:700;margin-bottom:4px}
+.tl-name{font-family:var(--serif);font-size:20px;font-weight:700;font-style:italic;margin-bottom:2px}
+.tl-weeks{font-family:var(--mono);font-size:10.5px;color:var(--dim);margin-bottom:16px;letter-spacing:.3px}
+.tl-outcome{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:20px}
+.tl-milestone{display:flex;align-items:center;gap:8px;margin-top:auto}
+.tl-ms-dia{width:7px;height:7px;transform:rotate(45deg);flex-shrink:0}
+.tl-ms-text{font-size:11px;font-weight:600;letter-spacing:.2px}
+.tl-expand{font-family:var(--mono);font-size:10px;color:var(--ghost);margin-top:16px;display:flex;align-items:center;gap:6px;transition:color .2s}
+.tl-phase:hover .tl-expand{color:var(--muted)}
+
+/* Pilot badges on timeline */
+.tl-pilot{margin-top:12px;font-family:var(--mono);font-size:10px;padding:4px 10px;border-radius:100px;display:inline-block}
+
+/* ═══ DRILL-DOWN PANEL ═══ */
+.drill-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px)}
+.drill-overlay.open{display:flex}
+.drill-panel{background:var(--surface);border:1px solid var(--border);border-radius:20px 20px 0 0;width:100%;max-width:900px;max-height:85vh;overflow-y:auto;padding:0;animation:slideUp .35s ease}
+@keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
+.drill-head{position:sticky;top:0;z-index:5;background:var(--surface);padding:28px 36px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start}
+.drill-head-left{}
+.drill-head-num{font-size:13px;font-weight:700;margin-bottom:2px}
+.drill-head-name{font-size:22px;font-weight:800;letter-spacing:-.3px}
+.drill-head-meta{font-family:var(--mono);font-size:11px;color:var(--dim);margin-top:4px}
+.drill-close{width:36px;height:36px;border-radius:50%;border:1px solid var(--border-2);background:transparent;color:var(--muted);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s,color .15s;flex-shrink:0}
+.drill-close:hover{background:var(--surface-3);color:var(--white)}
+.drill-body{padding:28px 36px 40px}
+
+/* Tags inside drill */
+.d-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:24px}
+.d-tag{font-family:var(--mono);font-size:10px;font-weight:500;padding:4px 10px;border-radius:100px;border:1px solid var(--border-2);color:var(--dim)}
+
+/* Description */
+.d-desc{font-size:14px;color:var(--muted);line-height:1.75;margin-bottom:28px;max-width:680px}
+
+/* Sub-section headers */
+.d-sh{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--ghost);margin-bottom:12px;margin-top:32px}
+
+/* Task table */
+.dtable{width:100%;border-collapse:collapse;margin-bottom:8px}
+.dtable th{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:1.2px;color:var(--ghost);padding:10px 0;text-align:left;border-bottom:1px solid var(--border)}
+.dtable th:nth-child(2),.dtable th:nth-child(3){text-align:right;padding-right:0}
+.dtable td{padding:13px 0;font-size:13px;color:var(--text-2);border-bottom:1px solid var(--faint)}
+.dtable td:nth-child(2),.dtable td:nth-child(3){text-align:right;font-family:var(--mono);font-size:11px;color:var(--dim)}
+.dtable tr:last-child td{border-bottom:none}
+.dtable .fb td{color:var(--cyan)}
+.dtable .fb td:first-child::before{content:'↻ '}
+
+/* Callout boxes */
+.callout{margin-top:20px;border-radius:12px;padding:22px 24px}
+.callout h4{font-size:13px;font-weight:700;margin-bottom:6px}
+.callout p{font-size:12.5px;color:var(--muted);line-height:1.65}
+.callout-metrics{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.cm{font-family:var(--mono);font-size:10px;padding:4px 10px;border-radius:100px}
+.callout.pilot{border:1px dashed var(--rose);background:var(--rose-d)}
+.callout.pilot h4{color:var(--rose)}
+.callout.pilot .cm{background:rgba(244,114,182,.06);color:var(--rose);border:1px solid rgba(244,114,182,.15)}
+.callout.qa{border:1px dashed var(--cyan);background:var(--cyan-d)}
+.callout.qa h4{color:var(--cyan)}
+.callout.qa .cm{background:rgba(34,211,238,.06);color:var(--cyan);border:1px solid rgba(34,211,238,.15)}
+
+/* Milestone in drill */
+.d-ms{margin-top:20px;display:flex;align-items:center;gap:10px;padding:14px 18px;background:var(--accent-d);border:1px solid rgba(200,255,0,.1);border-radius:10px}
+.d-ms-dia{width:8px;height:8px;background:var(--accent);transform:rotate(45deg);flex-shrink:0}
+.d-ms-text{font-size:12px;font-weight:600;color:var(--accent)}
+
+/* ═══ FEEDBACK ARCHITECTURE ═══ */
+.flow-section{margin-top:100px}
+.flow-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--border);border-radius:16px;overflow:hidden;margin-top:48px}
+.fl-item{background:var(--card);padding:28px 18px;text-align:center;position:relative}
+.fl-num{font-size:12px;font-weight:800;margin-bottom:8px}
+.fl-title{font-size:14px;font-weight:700;margin-bottom:8px}
+.fl-desc{font-size:11.5px;color:var(--dim);line-height:1.5}
+.fl-arrow{position:absolute;right:-8px;top:50%;transform:translateY(-50%);width:14px;height:14px;background:var(--surface-2);border:1px solid var(--border-2);border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:2;font-size:8px;color:var(--muted)}
+.fl-item:last-child .fl-arrow{display:none}
+
+/* ═══ SCOPE CUTS ═══ */
+.cut-section{margin-top:100px}
+.cut-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-radius:16px;overflow:hidden;margin-top:48px}
+.cut-card{background:var(--card);padding:32px 24px;position:relative}
+.cut-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--ghost);opacity:.25}
+.cc-id{font-family:var(--mono);font-size:10px;color:var(--ghost);margin-bottom:12px}
+.cc-icon{font-size:22px;margin-bottom:14px;display:block}
+.cc-name{font-size:14px;font-weight:600;color:var(--dim);text-decoration:line-through;text-decoration-color:rgba(255,255,255,.1);margin-bottom:10px;line-height:1.4}
+.cc-reason{font-size:12px;color:var(--ghost);line-height:1.65}
+.cc-saved{font-family:var(--mono);font-size:10px;color:var(--green);margin-top:14px}
+
+/* CTA */
+.cta{text-align:center;padding:100px 0 80px;border-top:1px solid var(--border);margin-top:100px}
+.cta h2{font-size:clamp(26px,3.5vw,42px);font-weight:800;letter-spacing:-1px}
+.cta h2 em{font-family:var(--serif);font-style:italic;font-weight:700}
+.cta-btn{display:inline-block;margin-top:24px;font-size:13px;font-weight:600;color:var(--bg);background:var(--white);padding:12px 32px;border-radius:100px;text-decoration:none;transition:background .2s,transform .15s}
+.cta-btn:hover{background:var(--accent);transform:translateY(-1px)}
+
+/* FOOTER */
+footer{border-top:1px solid var(--border);padding:28px 0;display:flex;justify-content:space-between;font-size:12px;color:var(--ghost)}
+footer a{color:var(--dim);text-decoration:none}
+
+/* RESPONSIVE */
+@media(max-width:1024px){.exec-grid{grid-template-columns:1fr 1fr 1fr}.tl-track{flex-direction:column}.tl-phase{border-right:none;border-bottom:1px solid var(--border)}.tl-phase:last-child{border-bottom:none}.cut-grid{grid-template-columns:repeat(2,1fr)}.flow-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:700px){.exec-grid{grid-template-columns:1fr}.cut-grid,.flow-grid{grid-template-columns:1fr}.fl-arrow{display:none!important}.n-right .n-link{display:none}.drill-panel{max-width:100%;border-radius:16px 16px 0 0}.drill-body{padding:20px 24px 32px}.drill-head{padding:20px 24px 16px}}
+</style>
+</head>
+<body>
+
+<nav class="pad">
+  <span class="n-logo">Tenex</span>
+  <div class="n-right">
+    <a class="n-link" href="https://karavohra.github.io/tenex-RAG/tenex-rag.html">RAG Architecture</a>
+    <a class="n-link" href="#timeline">Timeline</a>
+    <a class="n-link" href="#scope">Scope</a>
+    <a class="n-cta" href="https://www.tenex.co/get-started">Get Started</a>
+  </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero pad">
+  <h1>Win the next <em>13 weeks.</em></h1>
+  <p class="hero-body">
+    The Strategic Synthesis Engine goes from zero to MVP in four phases.
+    <strong>Two stakeholder pilot rounds. Four measurable feedback gates.</strong>
+    Every decision is data-driven. Every cut is deliberate.
+  </p>
+</section>
+
+<div class="mq"><div class="mq-track" id="marquee"></div></div>
+
+<!-- ═══ EXECUTIVE SUMMARY ═══ -->
+<section class="exec-section pad">
+  <div class="sec-label">Executive summary</div>
+  <div class="sec-h">The business case in <em>three numbers.</em></div>
+  <div class="sec-sub">What leadership needs to know before anything else — the investment, the validation, and the outcome.</div>
+</section>
+
+<div class="exec-grid pad" style="margin-left:clamp(24px,5vw,64px);margin-right:clamp(24px,5vw,64px)">
+  <div class="exec-card">
+    <div class="ec-label">Total investment</div>
+    <div class="ec-value">13 <span style="font-size:22px;color:var(--muted);font-weight:500">weeks</span></div>
+    <div class="ec-desc">3 engineers + PM. 2-week sprints at 45 story points per sprint. ~280 total points allocated across four phases.</div>
+  </div>
+  <div class="exec-card">
+    <div class="ec-label">Stakeholder validation</div>
+    <div class="ec-value" style="color:var(--rose)">2 <span style="font-size:22px;color:var(--muted);font-weight:500">pilots</span></div>
+    <div class="ec-desc">Light-touch pilot at Week 5 (5–8 users). Real pilot at Week 9 (15–20 users). No assumption ships unvalidated.</div>
+  </div>
+  <div class="exec-card">
+    <div class="ec-label">Scope discipline</div>
+    <div class="ec-value" style="color:var(--accent)">37 <span style="font-size:22px;color:var(--muted);font-weight:500">pts cut</span></div>
+    <div class="ec-desc">Four high-cost, low-value features deferred to post-MVP. Team stays focused on the core thesis: retrieve, reason, cite.</div>
+  </div>
+</div>
+
+<!-- ═══ VISUAL TIMELINE ═══ -->
+<section class="pad" style="margin-top:100px" id="timeline">
+  <div class="sec-label">The roadmap</div>
+  <div class="sec-h">Four phases. <em>Zero guesswork.</em></div>
+  <div class="sec-sub">Each card is the leadership view. Click any phase to see the full engineering breakdown — every task, story point, and feedback gate.</div>
+</section>
+
+<div class="pad" style="margin-top:48px">
+  <div class="tl-track" id="tlTrack"></div>
+</div>
+
+<!-- ═══ FEEDBACK ARCHITECTURE ═══ -->
+<section class="flow-section pad">
+  <div class="sec-label">Feedback architecture</div>
+  <div class="sec-h">Build, measure, <em>iterate.</em></div>
+  <div class="sec-sub">This loop runs at the end of every phase. Pilots in Weeks 5 and 9 feed data back into the sprint cycle.</div>
+</section>
+<div class="pad"><div class="flow-grid" id="flowGrid"></div></div>
+
+<!-- ═══ WHAT WE CUT ═══ -->
+<section class="cut-section pad" id="scope">
+  <div class="sec-label">Scope discipline</div>
+  <div class="sec-h">What we <em>cut</em> — and why.</div>
+  <div class="sec-sub">High-cost, low-value for v1. These features are valuable but not worth the trade-off against shipping a validated MVP in 13 weeks.</div>
+</section>
+<div class="pad"><div class="cut-grid" id="cutGrid"></div></div>
+
+<!-- ═══ CTA ═══ -->
+<section class="cta pad">
+  <h2>Ready to stop <em>searching</em><br>and start knowing?</h2>
+  <a class="cta-btn" href="https://karavohra.github.io/tenex-RAG/tenex-rag.html">View RAG Architecture ↗</a>
+</section>
+
+<footer class="pad">
+  <span>© 2026 Tenex. Strategic Synthesis Engine for MediGen Corp.</span>
+  <a href="https://www.tenex.co">tenex.co · human@tenex.co</a>
+</footer>
+
+<!-- ═══ DRILL-DOWN PANEL ═══ -->
+<div class="drill-overlay" id="drillOverlay" onclick="if(event.target===this)closeDrill()">
+  <div class="drill-panel" id="drillPanel"></div>
+</div>
+
+<script>
+// ═══ DATA ═══
+const pColors=['var(--green)','var(--accent)','var(--rose)','var(--amber)'];
+const pHex=['#34d399','#c8ff00','#f472b6','#fbbf24'];
+
+const phases=[
+  {
+    num:1,name:'Foundation',weeks:'Weeks 1–4',pts:90,color:0,
+    outcome:'The entire MediGen corpus — 50,000 documents — parsed, chunked, embedded, and retrievable via semantic search.',
+    milestone:'Internal QA Gate — retrieval benchmarks validated',
+    desc:'All 50K MediGen documents (PDFs, DOCX, TXT) are parsed via LlamaParse with OCR fallback, split into 512-token chunks with 50-token overlap, embedded as 1,536-dimension vectors, and indexed in Pinecone/pgvector. Phase ends with a vertical slice proving one query works end-to-end, validated by internal retrieval benchmarks.',
+    tags:['LlamaParse','OCR Fallback','512-token chunks','text-embedding-3-large','Pinecone / pgvector','50K docs'],
+    tasks:[
+      {n:'Document ingestion pipeline (PDF, DOCX, TXT)',p:8,w:'W1–2'},
+      {n:'Date extraction & metadata parsing',p:5,w:'W1–2'},
+      {n:'Chunking engine (512-token, 50-token overlap)',p:7,w:'W2–3'},
+      {n:'Embedding generation (1,536 dimensions)',p:6,w:'W2–3'},
+      {n:'Vector database setup & indexing',p:7,w:'W3–4'},
+      {n:'Semantic retrieval — top-N cosine similarity',p:6,w:'W3–4'},
+      {n:'End-to-end vertical slice (1 query, full pipeline)',p:6,w:'W4'},
+      {n:'Retrieval benchmark test suite',p:5,w:'W4'},
+    ],
+    milestones:['Internal QA Gate — retrieval benchmarks validated'],
+    pilot:null,
+    qa:{title:'Internal QA Gate',desc:'Retrieval precision/recall benchmarks against a curated test set. Citation accuracy audit. Team validates pipeline quality before any external exposure.',metrics:['Retrieval precision','Recall @ 5','Chunk relevance']}
+  },
+  {
+    num:2,name:'Intelligence',weeks:'Weeks 5–7',pts:82,color:1,
+    outcome:'Contradiction detection, citation-enforced synthesis, and confidence scoring live. First pilot with MediGen stakeholders validates retrieval quality.',
+    milestone:'Pilot 1 Complete + Iteration Gate passed',
+    pilotBadge:'Pilot 1 · 5–8 users · Week 5–6',
+    desc:'The differentiator layer — contradiction detection compares retrieved chunks for conflicting claims, recency weighting ensures newer documents rank higher, and a strict system prompt enforces that every LLM-generated claim must cite its source. A minimal query UI enables the first stakeholder pilot.',
+    tags:['Contradiction detection','Recency ranking','Citation-enforced','GPT-4o / Sonnet','Confidence scoring'],
+    tasks:[
+      {n:'Contradiction detection engine',p:9,w:'W5–6'},
+      {n:'Recency weighting logic',p:5,w:'W5'},
+      {n:'Citation-enforced LLM synthesis',p:8,w:'W5–6'},
+      {n:'Confidence scoring (High / Medium / Low)',p:5,w:'W6'},
+      {n:'Minimal query UI (pilot-ready)',p:6,w:'W5'},
+      {n:'Pilot 1 feedback synthesis & triage',p:3,w:'W6',f:1},
+      {n:'Iteration sprint — retrieval tuning',p:7,w:'W6–7',f:1},
+      {n:'Citation accuracy audit (manual)',p:4,w:'W7',f:1},
+      {n:'Contradiction detection validation',p:4,w:'W7',f:1},
+    ],
+    milestones:['Pilot 1 Complete — feedback collected','Iteration Gate — tuning validated'],
+    pilot:{title:'Pilot Round 1 — Week 5–6',who:'5–8 MediGen stakeholders',desc:'Light touch. Are the right documents surfacing? Structured feedback forms. Measuring retrieval relevance before the system gets smarter.',metrics:['Document relevance','Query comprehension','False negatives']},
+    qa:null
+  },
+  {
+    num:3,name:'Interface',weeks:'Weeks 8–10',pts:68,color:2,
+    outcome:'Production-quality NLQ interface with inline citations, confidence badges, and contradiction alerts. Broader pilot validates end-to-end usability.',
+    milestone:'Pilot 2 Complete — launch readiness assessed',
+    pilotBadge:'Pilot 2 · 15–20 users · Week 9–10',
+    desc:'The user-facing layer — a polished natural language query interface with clickable inline citations, confidence score badges, expandable "show sources" trace view, and contradiction alert cards. The real pilot tests the near-complete system against actual MediGen research workflows.',
+    tags:['NLQ Interface','Inline citations','Trace view','Confidence UI','Conflict alerts'],
+    tasks:[
+      {n:'Full NLQ interface (production)',p:8,w:'W8–9'},
+      {n:'Inline citation display',p:6,w:'W8'},
+      {n:'Basic trace view ("show sources")',p:5,w:'W8–9'},
+      {n:'Confidence score UI + low-confidence flags',p:4,w:'W9'},
+      {n:'Contradiction alert UI',p:5,w:'W9'},
+      {n:'Pilot 2 feedback synthesis & triage',p:3,w:'W10',f:1},
+      {n:'Benchmark comparison — pre vs post tuning',p:4,w:'W10',f:1},
+    ],
+    milestones:['Pilot 2 Complete — launch readiness assessed'],
+    pilot:{title:'Pilot Round 2 — Week 9–10',who:'15–20 MediGen stakeholders',desc:'Full system, real workflows. Measuring answer quality, citation trust, contradiction precision, and overall usability.',metrics:['Answer accuracy','Citation trust','Contradiction precision','NPS score']},
+    qa:null
+  },
+  {
+    num:4,name:'Launch',weeks:'Weeks 11–13',pts:52,color:3,
+    outcome:'Full-scale 50K corpus validated under <3s latency. Audit logging, error handling, documentation complete. MVP ships.',
+    milestone:'✦ MVP Launch — Strategic Synthesis Engine live',
+    desc:'Final iteration on Pilot 2 feedback, performance validation against the full 50K document corpus, query latency optimization targeting <3 seconds end-to-end, simplified audit logging, error handling for edge cases, documentation and runbook, and final benchmark comparison against the Week 4 baseline.',
+    tags:['50K scale test','< 3s latency','Audit logging','Error handling','Documentation','Runbook'],
+    tasks:[
+      {n:'Iterate on Pilot 2 feedback',p:8,w:'W11',f:1},
+      {n:'50K corpus full-scale load test',p:7,w:'W11–12'},
+      {n:'Query latency optimization (< 3s target)',p:6,w:'W11–12'},
+      {n:'Basic query audit logging',p:5,w:'W12'},
+      {n:'Error handling & edge cases',p:5,w:'W12–13'},
+      {n:'Documentation & runbook',p:4,w:'W13'},
+      {n:'Final benchmarks vs. Week 4 baseline',p:4,w:'W13',f:1},
+    ],
+    milestones:['✦ MVP Launch — Strategic Synthesis Engine live'],
+    pilot:null,qa:null
+  }
+];
+
+const cuts=[
+  {id:'C-01',icon:'🔐',name:'Immutable audit log with 7-year retention',pts:13,reason:'High infrastructure cost. Basic query logging covers MVP compliance. Full immutability is a post-MVP hardening feature.',saved:'~2 sprints of 1 engineer'},
+  {id:'C-02',icon:'📄',name:'One-click PDF export with citations',pts:8,reason:'Nice-to-have for legal. Copy or screenshot works for now. Revisit post-MVP based on demand signal.',saved:'~1 sprint of 1 engineer'},
+  {id:'C-03',icon:'🔗',name:'Full evidence chain trace view',pts:10,reason:'Complex UI, limited MVP impact. Basic "show sources" expandable is sufficient for v1.',saved:'~1.5 sprints of 1 engineer'},
+  {id:'C-04',icon:'⌨️',name:'Boolean / advanced query syntax',pts:6,reason:'Natural language is the core value prop. Power-user syntax adds complexity without validating the thesis.',saved:'~1 sprint of 1 engineer'},
+];
+
+const flowSteps=[
+  {n:'01',t:'Build',d:'Ship features each sprint against point targets',c:'var(--white)'},
+  {n:'02',t:'Benchmark',d:'Internal QA: precision, recall, citation accuracy',c:'var(--cyan)'},
+  {n:'03',t:'Pilot',d:'MediGen stakeholders test with real queries',c:'var(--rose)'},
+  {n:'04',t:'Collect',d:'Structured forms, satisfaction scores, bugs',c:'var(--white)'},
+  {n:'05',t:'Triage',d:'PM prioritizes by impact. Scope adjustments.',c:'var(--amber)'},
+  {n:'06',t:'Iterate',d:'Dedicated sprint time for fixes. Repeat.',c:'var(--accent)'},
+];
+
+// ═══ MARQUEE ═══
+(function(){
+  const el=document.getElementById('marquee');
+  const txt='13 weeks to MVP · 3 engineers · 45 pts/sprint · 2 pilot rounds · 4 feedback gates · 37 points cut · ';
+  let h='';for(let i=0;i<4;i++)h+=`<span class="mq-item"><span class="mq-dot"></span>${txt}</span>`;
+  el.innerHTML=h;
+})();
+
+// ═══ TIMELINE CARDS ═══
+(function(){
+  const el=document.getElementById('tlTrack');
+  let h='';
+  phases.forEach((p,i)=>{
+    const c=pColors[p.color],hex=pHex[p.color];
+    h+=`<div class="tl-phase" onclick="openDrill(${i})">`;
+    h+=`<div class="tl-bar" style="background:${c}"></div>`;
+    h+=`<div class="tl-num" style="color:${c}">0${p.num}</div>`;
+    h+=`<div class="tl-name">${p.name}</div>`;
+    h+=`<div class="tl-weeks">${p.weeks} · ${p.pts} pts</div>`;
+    h+=`<div class="tl-outcome">${p.outcome}</div>`;
+    h+=`<div class="tl-milestone"><div class="tl-ms-dia" style="background:${c}"></div><span class="tl-ms-text" style="color:${c}">${p.milestone}</span></div>`;
+    if(p.pilotBadge) h+=`<div class="tl-pilot" style="background:var(--rose-d);color:var(--rose);border:1px solid rgba(244,114,182,.15)">⬥ ${p.pilotBadge}</div>`;
+    h+=`<div class="tl-expand">View full breakdown →</div>`;
+    h+=`</div>`;
+  });
+  el.innerHTML=h;
+})();
+
+// ═══ DRILL-DOWN ═══
+function openDrill(i){
+  const p=phases[i],c=pColors[p.color];
+  const overlay=document.getElementById('drillOverlay');
+  const panel=document.getElementById('drillPanel');
+  let h='';
+
+  // Header
+  h+=`<div class="drill-head"><div class="drill-head-left"><div class="drill-head-num" style="color:${c}">Phase 0${p.num}</div><div class="drill-head-name">${p.name}</div><div class="drill-head-meta">${p.weeks} · ${p.pts} story points · 45 pts/sprint velocity</div></div><button class="drill-close" onclick="closeDrill()">✕</button></div>`;
+
+  // Body
+  h+=`<div class="drill-body">`;
+  h+=`<div class="d-tags">`;p.tags.forEach(t=>{h+=`<span class="d-tag">${t}</span>`});h+=`</div>`;
+  h+=`<div class="d-desc">${p.desc}</div>`;
+
+  // Task table
+  h+=`<div class="d-sh">Deliverables & Story Points</div>`;
+  h+=`<table class="dtable"><thead><tr><th>Task</th><th>Points</th><th>Timing</th></tr></thead><tbody>`;
+  p.tasks.forEach(t=>{
+    h+=`<tr class="${t.f?'fb':''}"><td>${t.n}</td><td>${t.p}</td><td>${t.w}</td></tr>`;
+  });
+  h+=`</tbody></table>`;
+
+  // Total
+  const total=p.tasks.reduce((a,t)=>a+t.p,0);
+  h+=`<div style="font-family:var(--mono);font-size:11px;color:var(--dim);text-align:right;margin-top:8px">Total: ${total} pts</div>`;
+
+  // Milestones
+  h+=`<div class="d-sh">Milestones</div>`;
+  p.milestones.forEach(m=>{
+    h+=`<div class="d-ms"><div class="d-ms-dia"></div><span class="d-ms-text">${m}</span></div>`;
+  });
+
+  // Pilot
+  if(p.pilot){
+    const pi=p.pilot;
+    h+=`<div class="d-sh">Stakeholder Pilot</div>`;
+    h+=`<div class="callout pilot"><h4>⬥ ${pi.title}</h4><p><strong>${pi.who}.</strong> ${pi.desc}</p><div class="callout-metrics">`;
+    pi.metrics.forEach(m=>{h+=`<span class="cm">${m}</span>`});
+    h+=`</div></div>`;
+  }
+  // QA
+  if(p.qa){
+    const q=p.qa;
+    h+=`<div class="d-sh">Internal Feedback Gate</div>`;
+    h+=`<div class="callout qa"><h4>↻ ${q.title}</h4><p>${q.desc}</p><div class="callout-metrics">`;
+    q.metrics.forEach(m=>{h+=`<span class="cm">${m}</span>`});
+    h+=`</div></div>`;
+  }
+
+  h+=`</div>`;
+  panel.innerHTML=h;
+  overlay.classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function closeDrill(){
+  document.getElementById('drillOverlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDrill()});
+
+// ═══ FEEDBACK FLOW ═══
+(function(){
+  const el=document.getElementById('flowGrid');
+  let h='';
+  flowSteps.forEach(s=>{
+    h+=`<div class="fl-item"><div class="fl-num" style="color:${s.c}">${s.n}</div><div class="fl-title">${s.t}</div><div class="fl-desc">${s.d}</div><div class="fl-arrow">→</div></div>`;
+  });
+  el.innerHTML=h;
+})();
+
+// ═══ CUT FEATURES ═══
+(function(){
+  const el=document.getElementById('cutGrid');
+  let h='';
+  cuts.forEach(c=>{
+    h+=`<div class="cut-card"><div class="cc-id">${c.id}</div><span class="cc-icon">${c.icon}</span><div class="cc-name">${c.name}</div><div class="cc-reason">${c.reason}</div><div class="cc-saved">↳ Saves ${c.saved} · ${c.pts} pts recovered</div></div>`;
+  });
+  el.innerHTML=h;
+})();
+</script>
+</body>
+</html>
