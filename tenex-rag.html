@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Strategic Synthesis Engine — RAG Architecture</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Mono:wght@300;400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --black: #0A0A0A;
+    --yellow: #F0D800;
+    --yellow-dim: #F0D80022;
+    --yellow-mid: #F0D80055;
+    --white: #FFFFFF;
+    --gray-100: #F7F7F5;
+    --gray-200: #EBEBEB;
+    --gray-400: #AAAAAA;
+    --gray-600: #666666;
+    --gray-800: #2A2A2A;
+    --step-height: 120px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 48px;
+    border-bottom: 1px solid #ffffff0d;
+    background: #0A0A0Aee;
+    backdrop-filter: blur(12px);
+  }
+
+  .nav-logo {
+    display: flex; align-items: center; gap: 10px;
+    font-family: 'DM Mono', monospace;
+    font-size: 15px; font-weight: 500;
+    letter-spacing: 0.02em;
+    color: var(--white);
+    text-decoration: none;
+  }
+
+  .logo-mark {
+    width: 28px; height: 20px;
+    display: grid; grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr; gap: 3px;
+  }
+
+  .logo-mark span {
+    background: var(--yellow);
+    border-radius: 1px;
+  }
+  .logo-mark span:nth-child(2) { background: transparent; border: 1.5px solid var(--yellow); }
+
+  .nav-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; font-weight: 400;
+    color: var(--gray-400);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 0 48px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg-text {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(120px, 18vw, 260px);
+    font-weight: 900;
+    color: #ffffff04;
+    white-space: nowrap;
+    pointer-events: none;
+    user-select: none;
+    letter-spacing: -0.04em;
+  }
+
+  .hero-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin-bottom: 24px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.2s;
+  }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(48px, 7vw, 96px);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    max-width: 900px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.4s;
+  }
+
+  .hero-title em {
+    font-style: italic;
+    color: var(--yellow);
+  }
+
+  .hero-sub {
+    margin-top: 32px;
+    font-size: 16px;
+    font-weight: 300;
+    color: var(--gray-400);
+    max-width: 560px;
+    line-height: 1.7;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.6s;
+  }
+
+  .hero-scroll {
+    margin-top: 56px;
+    display: flex; align-items: center; gap: 16px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards 0.8s;
+  }
+
+  .scroll-line {
+    width: 64px; height: 1px;
+    background: var(--yellow);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .scroll-line::after {
+    content: '';
+    position: absolute; top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: var(--white);
+    animation: scanline 2s ease-in-out infinite 1.5s;
+  }
+
+  .scroll-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gray-400);
+  }
+
+  /* ── SECTION WRAPPER ── */
+  .section {
+    padding: 120px 48px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(32px, 4vw, 52px);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+  }
+
+  .section-title em { font-style: italic; color: var(--yellow); }
+
+  .section-body {
+    font-size: 15px;
+    font-weight: 300;
+    color: var(--gray-400);
+    max-width: 600px;
+    line-height: 1.8;
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, var(--yellow) 0%, #ffffff15 60%, transparent 100%);
+  }
+
+  /* ── RAG PIPELINE ── */
+  .pipeline-section {
+    background: #0D0D0D;
+    border-top: 1px solid #1a1a1a;
+    border-bottom: 1px solid #1a1a1a;
+    padding: 120px 48px;
+  }
+
+  .pipeline-header {
+    max-width: 1400px;
+    margin: 0 auto 80px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 40px;
+    flex-wrap: wrap;
+  }
+
+  .pipeline-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  /* The main flow — vertical on mobile, horizontal-ish stacked on desktop */
+  .pipeline-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+  }
+
+  .pipeline-step {
+    display: grid;
+    grid-template-columns: 64px 1fr 1fr;
+    gap: 0 40px;
+    align-items: start;
+    position: relative;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .pipeline-step.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Connector line between steps */
+  .pipeline-step:not(:last-child) .step-num::after {
+    content: '';
+    position: absolute;
+    top: 56px; left: 50%;
+    transform: translateX(-50%);
+    width: 1px;
+    height: calc(100% + 1px);
+    background: linear-gradient(180deg, var(--yellow) 0%, #F0D80033 60%, transparent 100%);
+  }
+
+  .step-num-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 4px;
+  }
+
+  .step-num {
+    width: 48px; height: 48px;
+    border: 1.5px solid var(--yellow);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--yellow);
+    position: relative;
+    flex-shrink: 0;
+    background: var(--black);
+    z-index: 1;
+  }
+
+  .step-connector {
+    flex: 1;
+    width: 1px;
+    background: linear-gradient(180deg, #F0D80066 0%, #F0D80011 100%);
+    margin-top: 0;
+    min-height: 60px;
+  }
+
+  .step-content {
+    padding: 0 0 72px 0;
+  }
+
+  .step-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .step-tag::before {
+    content: '';
+    display: block;
+    width: 20px; height: 1px;
+    background: var(--yellow);
+  }
+
+  .step-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 12px;
+    letter-spacing: -0.01em;
+  }
+
+  .step-desc {
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--gray-400);
+    line-height: 1.8;
+    max-width: 400px;
+    margin-bottom: 20px;
+  }
+
+  .step-pills {
+    display: flex; flex-wrap: wrap; gap: 8px;
+  }
+
+  .pill {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    padding: 5px 12px;
+    border: 1px solid #333;
+    border-radius: 100px;
+    color: var(--gray-400);
+    background: #ffffff05;
+  }
+
+  .pill.accent {
+    border-color: var(--yellow);
+    color: var(--yellow);
+    background: var(--yellow-dim);
+  }
+
+  /* Right side: visual diagram per step */
+  .step-visual {
+    padding: 0 0 72px 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+
+  .visual-card {
+    border: 1px solid #1e1e1e;
+    border-radius: 12px;
+    padding: 24px;
+    background: #111111;
+    width: 100%;
+    max-width: 480px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .visual-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--yellow) 0%, transparent 60%);
+  }
+
+  .visual-card-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gray-600);
+    margin-bottom: 16px;
+  }
+
+  /* Document grid for ingestion */
+  .doc-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  .doc-item {
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 6px;
+    padding: 10px 8px;
+    text-align: center;
+    transition: border-color 0.3s, background 0.3s;
+  }
+
+  .doc-item:hover { border-color: var(--yellow); background: var(--yellow-dim); }
+
+  .doc-icon {
+    font-size: 18px;
+    margin-bottom: 4px;
+    display: block;
+  }
+
+  .doc-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--gray-600);
+    letter-spacing: 0.05em;
+  }
+
+  /* Chunk visualization */
+  .chunk-visual {
+    display: flex; flex-direction: column; gap: 6px;
+  }
+
+  .chunk-row {
+    display: flex; gap: 4px; align-items: center;
+  }
+
+  .chunk-block {
+    height: 28px;
+    border-radius: 4px;
+    background: #1e1e1e;
+    border: 1px solid #2a2a2a;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 8px;
+    color: var(--gray-600);
+    position: relative;
+    transition: background 0.3s, border-color 0.3s;
+  }
+
+  .chunk-block.active {
+    background: var(--yellow-dim);
+    border-color: var(--yellow);
+    color: var(--yellow);
+  }
+
+  .chunk-overlap {
+    width: 20px;
+    height: 28px;
+    background: #F0D80015;
+    border: 1px dashed #F0D80055;
+    border-radius: 2px;
+  }
+
+  /* Vector embedding viz */
+  .vector-viz {
+    display: flex; flex-direction: column; gap: 8px;
+  }
+
+  .vector-row {
+    display: flex; align-items: center; gap: 10px;
+  }
+
+  .vector-label-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--gray-600);
+    width: 80px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .vector-bars {
+    display: flex; gap: 2px; align-items: flex-end;
+    height: 28px; flex: 1;
+  }
+
+  .vector-bar {
+    flex: 1;
+    background: #1e1e1e;
+    border-radius: 2px;
+    transition: background 0.3s;
+    min-height: 4px;
+  }
+
+  .vector-row:hover .vector-bar { background: #F0D80044; }
+  .vector-row.top .vector-bar { background: var(--yellow); }
+
+  .vector-score {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--gray-600);
+    width: 36px;
+    text-align: right;
+  }
+
+  .vector-row.top .vector-score { color: var(--yellow); }
+
+  /* Query box */
+  .query-box {
+    background: #161616;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--gray-400);
+    line-height: 1.6;
+    position: relative;
+  }
+
+  .query-box::before {
+    content: '> QUERY';
+    display: block;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: var(--yellow);
+    margin-bottom: 8px;
+  }
+
+  /* Answer box */
+  .answer-box {
+    background: #161616;
+    border: 1px solid #F0D80033;
+    border-radius: 8px;
+    padding: 16px;
+  }
+
+  .answer-box-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: var(--yellow);
+    margin-bottom: 10px;
+  }
+
+  .answer-text {
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--gray-400);
+    line-height: 1.7;
+    margin-bottom: 10px;
+  }
+
+  .answer-cite {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    padding: 2px 8px;
+    background: var(--yellow-dim);
+    border: 1px solid var(--yellow-mid);
+    border-radius: 4px;
+    color: var(--yellow);
+    margin: 2px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .answer-cite:hover { background: var(--yellow-mid); }
+
+  /* Conflict box */
+  .conflict-box {
+    background: #1a1100;
+    border: 1px solid #F0D80055;
+    border-left: 3px solid var(--yellow);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+  }
+
+  .conflict-header {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin-bottom: 8px;
+    display: flex; align-items: center; gap: 6px;
+  }
+
+  .conflict-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--yellow);
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  .conflict-text {
+    font-size: 11px;
+    font-weight: 300;
+    color: var(--gray-400);
+    line-height: 1.6;
+  }
+
+  .conflict-text strong { color: var(--white); font-weight: 500; }
+
+  /* Confidence badge */
+  .confidence-row {
+    display: flex; align-items: center; gap: 10px; margin-top: 10px;
+  }
+
+  .conf-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    color: var(--gray-600);
+    text-transform: uppercase;
+  }
+
+  .conf-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 3px 10px;
+    background: #00ff8811;
+    border: 1px solid #00ff8844;
+    border-radius: 100px;
+    color: #00ff88;
+    font-weight: 500;
+  }
+
+  .conf-bars {
+    display: flex; gap: 3px;
+  }
+
+  .conf-bar {
+    width: 4px; height: 14px;
+    border-radius: 2px;
+    background: #1e1e1e;
+  }
+  .conf-bar.filled { background: var(--yellow); }
+
+  /* ── FEATURE CARDS ── */
+  .features-section {
+    padding: 120px 48px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: #1a1a1a;
+    border: 1px solid #1a1a1a;
+    border-radius: 16px;
+    overflow: hidden;
+    margin-top: 60px;
+  }
+
+  .feature-card {
+    background: #0A0A0A;
+    padding: 40px 36px;
+    transition: background 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .feature-card:hover { background: #111111; }
+
+  .feature-card::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 0;
+    background: linear-gradient(180deg, transparent, var(--yellow-dim));
+    transition: height 0.4s ease;
+  }
+
+  .feature-card:hover::after { height: 60px; }
+
+  .feature-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--yellow);
+    letter-spacing: 0.12em;
+    margin-bottom: 20px;
+  }
+
+  .feature-icon {
+    font-size: 28px;
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .feature-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    line-height: 1.3;
+  }
+
+  .feature-desc {
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--gray-400);
+    line-height: 1.7;
+  }
+
+  /* ── FLOW DIAGRAM (horizontal) ── */
+  .flow-section {
+    background: #0D0D0D;
+    border-top: 1px solid #1a1a1a;
+    padding: 120px 48px;
+  }
+
+  .flow-container {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .flow-diagram {
+    margin-top: 64px;
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+
+  .flow-node {
+    flex: 1;
+    min-width: 160px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+
+  .flow-node:not(:last-child)::after {
+    content: '→';
+    position: absolute;
+    right: -12px;
+    top: 40px;
+    font-size: 18px;
+    color: var(--yellow);
+    z-index: 2;
+  }
+
+  .flow-box {
+    width: 100%;
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 10px;
+    padding: 20px 16px;
+    text-align: center;
+    transition: border-color 0.3s, background 0.3s;
+    cursor: default;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .flow-node:hover .flow-box {
+    border-color: var(--yellow);
+    background: #141200;
+  }
+
+  .flow-box-accent {
+    border-color: var(--yellow) !important;
+    background: var(--yellow-dim) !important;
+  }
+
+  .flow-box-top {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--yellow);
+    margin-bottom: 8px;
+  }
+
+  .flow-box-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 8px;
+  }
+
+  .flow-box-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--gray-600);
+    line-height: 1.5;
+  }
+
+  .flow-label {
+    margin-top: 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--gray-600);
+    letter-spacing: 0.1em;
+    text-align: center;
+  }
+
+  /* ── BOTTOM CTA ── */
+  .cta-section {
+    padding: 120px 48px;
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 40px;
+    flex-wrap: wrap;
+  }
+
+  .cta-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(36px, 5vw, 72px);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    max-width: 700px;
+  }
+
+  .cta-title em { font-style: italic; color: var(--yellow); }
+
+  .cta-btn {
+    display: inline-flex; align-items: center; gap: 12px;
+    background: var(--yellow);
+    color: var(--black);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 16px 32px;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+    border: none; cursor: pointer;
+  }
+
+  .cta-btn:hover { background: #fff; transform: translateY(-2px); }
+
+  .cta-arrow { font-size: 18px; }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid #1a1a1a;
+    padding: 32px 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .footer-copy {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--gray-600);
+    letter-spacing: 0.08em;
+  }
+
+  .footer-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--gray-800);
+    letter-spacing: 0.06em;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes scanline {
+    0%   { left: -100%; }
+    100% { left: 200%; }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.5; transform: scale(0.7); }
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0; }
+  }
+
+  .cursor {
+    display: inline-block;
+    width: 2px; height: 1em;
+    background: var(--yellow);
+    margin-left: 2px;
+    vertical-align: middle;
+    animation: blink 1s step-end infinite;
+  }
+
+  /* Scroll reveal */
+  .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    nav, .hero, .pipeline-section, .features-section,
+    .flow-section, .cta-section, footer {
+      padding-left: 24px; padding-right: 24px;
+    }
+    .pipeline-step { grid-template-columns: 48px 1fr; }
+    .step-visual { display: none; }
+    .features-grid { grid-template-columns: 1fr; }
+    .cta-section { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">
+    <div class="logo-mark">
+      <span></span><span></span>
+      <span></span><span></span>
+    </div>
+    Tenex
+  </a>
+  <span class="nav-tag">Strategic Synthesis Engine — RAG Architecture</span>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg-text">RAG</div>
+  <p class="hero-eyebrow">How it works</p>
+  <h1 class="hero-title">
+    From 50,000 documents<br>to one <em>precise answer.</em>
+  </h1>
+  <p class="hero-sub">
+    The Strategic Synthesis Engine doesn't guess. It retrieves, reasons, and cites — every time. Here's the architecture that makes it possible.
+  </p>
+  <div class="hero-scroll">
+    <div class="scroll-line"></div>
+    <span class="scroll-text">Scroll to explore</span>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PIPELINE -->
+<section class="pipeline-section">
+  <div class="pipeline-header">
+    <div>
+      <p class="section-label">The Pipeline</p>
+      <h2 class="section-title">Six layers.<br><em>Zero guesswork.</em></h2>
+    </div>
+    <p class="section-body">
+      Every query travels through a deterministic, auditable pipeline. No black boxes. Every step is traceable — from your question to the exact page it came from.
+    </p>
+  </div>
+
+  <div class="pipeline-container">
+    <div class="pipeline-steps">
+
+      <!-- STEP 1 -->
+      <div class="pipeline-step">
+        <div class="step-num-wrap">
+          <div class="step-num">01</div>
+          <div class="step-connector"></div>
+        </div>
+        <div class="step-content">
+          <div class="step-tag">Foundation</div>
+          <h3 class="step-name">Document Ingestion<br>& Indexing</h3>
+          <p class="step-desc">All 50,000 MediGen documents — PDFs, DOCX, TXT — are parsed, cleaned, and loaded into the system. Publication dates are extracted and stored as first-class metadata. The corpus is your single source of truth.</p>
+          <div class="step-pills">
+            <span class="pill accent">PDF · DOCX · TXT</span>
+            <span class="pill">LlamaParse</span>
+            <span class="pill">OCR Fallback</span>
+            <span class="pill">Date Extraction</span>
+            <span class="pill">50,000 docs</span>
+          </div>
+        </div>
+        <div class="step-visual">
+          <div class="visual-card">
+            <div class="visual-card-label">Document corpus — 50,000 files</div>
+            <div class="doc-grid">
+              <div class="doc-item"><span class="doc-icon">📄</span><span class="doc-label">study_2023.pdf</span></div>
+              <div class="doc-item"><span class="doc-icon">📋</span><span class="doc-label">report_q4.docx</span></div>
+              <div class="doc-item"><span class="doc-icon">🔬</span><span class="doc-label">trial_b2.pdf</span></div>
+              <div class="doc-item"><span class="doc-icon">⚖️</span><span class="doc-label">legal_mem.pdf</span></div>
+              <div class="doc-item"><span class="doc-icon">📊</span><span class="doc-label">analysis.pdf</span></div>
+              <div class="doc-item"><span class="doc-icon">🧬</span><span class="doc-label">compound_x.pdf</span></div>
+              <div class="doc-item"><span class="doc-icon">📝</span><span class="doc-label">memo_2022.txt</span></div>
+              <div class="doc-item" style="border-color:#F0D800; background: var(--yellow-dim)"><span class="doc-icon">✦</span><span class="doc-label" style="color:var(--yellow)">+49,993</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="pipeline-step">
+        <div class="step-num-wrap">
+          <div class="step-num">02</div>
+          <div class="step-connector"></div>
+        </div>
+        <div class="step-content">
+          <div class="step-tag">Processing</div>
+          <h3 class="step-name">Chunking &<br>Overlap Strategy</h3>
+          <p class="step-desc">Documents are split into 512-token segments with 50-token overlaps. This overlap ensures no insight is cut off at a boundary. Each chunk inherits its parent document's metadata — source, page, date, department.</p>
+          <div class="step-pills">
+            <span class="pill accent">512-token chunks</span>
+            <span class="pill accent">50-token overlap</span>
+            <span class="pill">Paragraph-aware</span>
+            <span class="pill">Metadata inheritance</span>
+          </div>
+        </div>
+        <div class="step-visual">
+          <div class="visual-card">
+            <div class="visual-card-label">Chunking strategy — document → segments</div>
+            <div class="chunk-visual">
+              <div class="chunk-row">
+                <div class="chunk-block active" style="width:42%">chunk_001<br><span style="font-size:7px;color:#F0D80088">512 tokens</span></div>
+                <div class="chunk-overlap"></div>
+                <div class="chunk-block active" style="width:42%">chunk_002<br><span style="font-size:7px;color:#F0D80088">512 tokens</span></div>
+              </div>
+              <div class="chunk-row">
+                <div class="chunk-overlap" style="margin-left:38%"></div>
+                <div class="chunk-block active" style="width:42%">chunk_003<br><span style="font-size:7px;color:#F0D80088">512 tokens</span></div>
+                <div class="chunk-overlap"></div>
+              </div>
+              <div style="margin-top:12px; padding-top:12px; border-top:1px solid #1e1e1e;">
+                <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--gray-600);line-height:1.8;">
+                  <span style="color:var(--yellow)">source:</span> study_2023.pdf<br>
+                  <span style="color:var(--yellow)">page:</span> 14<br>
+                  <span style="color:var(--yellow)">date:</span> 2023-09-12<br>
+                  <span style="color:var(--yellow)">dept:</span> Research / Phase II
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="pipeline-step">
+        <div class="step-num-wrap">
+          <div class="step-num">03</div>
+          <div class="step-connector"></div>
+        </div>
+        <div class="step-content">
+          <div class="step-tag">Intelligence</div>
+          <h3 class="step-name">Embedding &<br>Semantic Retrieval</h3>
+          <p class="step-desc">Each chunk is converted into a 1,536-dimension vector — a mathematical fingerprint of its meaning. When you ask a question, it becomes a vector too. The system finds the most semantically similar chunks — not just keyword matches.</p>
+          <div class="step-pills">
+            <span class="pill accent">text-embedding-3-large</span>
+            <span class="pill">1536 dimensions</span>
+            <span class="pill">Cosine similarity</span>
+            <span class="pill">Pinecone / pgvector</span>
+          </div>
+        </div>
+        <div class="step-visual">
+          <div class="visual-card">
+            <div class="visual-card-label">Retrieval ranking — cosine similarity scores</div>
+            <div class="vector-viz" id="vectorViz">
+              <div class="vector-row top">
+                <div class="vector-label-text">study_2023 p.14</div>
+                <div class="vector-bars">
+                  <div class="vector-bar" style="height:100%"></div><div class="vector-bar" style="height:80%"></div><div class="vector-bar" style="height:95%"></div><div class="vector-bar" style="height:70%"></div><div class="vector-bar" style="height:88%"></div><div class="vector-bar" style="height:60%"></div><div class="vector-bar" style="height:75%"></div><div class="vector-bar" style="height:90%"></div><div class="vector-bar" style="height:65%"></div><div class="vector-bar" style="height:85%"></div>
+                </div>
+                <div class="vector-score">0.94</div>
+              </div>
+              <div class="vector-row">
+                <div class="vector-label-text">trial_b2 p.7</div>
+                <div class="vector-bars">
+                  <div class="vector-bar" style="height:75%"></div><div class="vector-bar" style="height:60%"></div><div class="vector-bar" style="height:80%"></div><div class="vector-bar" style="height:55%"></div><div class="vector-bar" style="height:70%"></div><div class="vector-bar" style="height:45%"></div><div class="vector-bar" style="height:65%"></div><div class="vector-bar" style="height:75%"></div><div class="vector-bar" style="height:50%"></div><div class="vector-bar" style="height:68%"></div>
+                </div>
+                <div class="vector-score">0.81</div>
+              </div>
+              <div class="vector-row">
+                <div class="vector-label-text">compound_x p.3</div>
+                <div class="vector-bars">
+                  <div class="vector-bar" style="height:55%"></div><div class="vector-bar" style="height:45%"></div><div class="vector-bar" style="height:60%"></div><div class="vector-bar" style="height:40%"></div><div class="vector-bar" style="height:52%"></div><div class="vector-bar" style="height:38%"></div><div class="vector-bar" style="height:48%"></div><div class="vector-bar" style="height:55%"></div><div class="vector-bar" style="height:42%"></div><div class="vector-bar" style="height:50%"></div>
+                </div>
+                <div class="vector-score">0.76</div>
+              </div>
+              <div class="vector-row">
+                <div class="vector-label-text">memo_2022 p.2</div>
+                <div class="vector-bars">
+                  <div class="vector-bar" style="height:40%"></div><div class="vector-bar" style="height:30%"></div><div class="vector-bar" style="height:45%"></div><div class="vector-bar" style="height:28%"></div><div class="vector-bar" style="height:38%"></div><div class="vector-bar" style="height:25%"></div><div class="vector-bar" style="height:35%"></div><div class="vector-bar" style="height:42%"></div><div class="vector-bar" style="height:30%"></div><div class="vector-bar" style="height:38%"></div>
+                </div>
+                <div class="vector-score">0.62</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 4 -->
+      <div class="pipeline-step">
+        <div class="step-num-wrap">
+          <div class="step-num">04</div>
+          <div class="step-connector"></div>
+        </div>
+        <div class="step-content">
+          <div class="step-tag">Differentiator</div>
+          <h3 class="step-name">Contradiction<br>Detection</h3>
+          <p class="step-desc">Before synthesizing, the system compares retrieved chunks for conflicting claims. If two studies disagree, it never silently averages them — it surfaces the conflict explicitly, ranked by recency. The most recent evidence is always labeled.</p>
+          <div class="step-pills">
+            <span class="pill accent">Conflict detection</span>
+            <span class="pill accent">Recency ranking</span>
+            <span class="pill">Semantic comparison</span>
+            <span class="pill">&lt;2s added latency</span>
+          </div>
+        </div>
+        <div class="step-visual">
+          <div class="visual-card">
+            <div class="visual-card-label">Contradiction alert — live example</div>
+            <div class="conflict-box">
+              <div class="conflict-header">
+                <div class="conflict-dot"></div>
+                Evidence conflict detected across 3 studies
+              </div>
+              <div class="conflict-text">
+                <strong>Study A (2019)</strong> reports 42% efficacy under standard dosing.<br>
+                <strong>Study C (2023)</strong> reports 61% efficacy under revised protocol.<br><br>
+                <span style="color:var(--yellow)">★ Most recent evidence supports 61% — Study C, p.8</span>
+              </div>
+            </div>
+            <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--gray-600);line-height:1.7;padding:8px 0;">
+              <span style="color:var(--yellow)">→</span> Expand conflict detail to compare passages side-by-side
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 5 -->
+      <div class="pipeline-step">
+        <div class="step-num-wrap">
+          <div class="step-num">05</div>
+          <div class="step-connector"></div>
+        </div>
+        <div class="step-content">
+          <div class="step-tag">Generation</div>
+          <h3 class="step-name">LLM Contextual<br>Synthesis</h3>
+          <p class="step-desc">Retrieved chunks — and any detected conflicts — are passed to a frontier LLM. A strict system prompt enforces one rule: every factual claim must be cited. The model cannot generate an uncited statement. Hallucination is structurally impossible.</p>
+          <div class="step-pills">
+            <span class="pill accent">GPT-4o / Claude Sonnet</span>
+            <span class="pill">Citation-enforced prompt</span>
+            <span class="pill">Context-grounded only</span>
+            <span class="pill">No parametric memory</span>
+          </div>
+        </div>
+        <div class="step-visual">
+          <div class="visual-card">
+            <div class="visual-card-label">LLM synthesis — input → output</div>
+            <div class="query-box">
+              What are the most recent internal findings on Compound X efficacy in Phase II trials?
+            </div>
+            <div class="answer-box">
+              <div class="answer-box-label">✦ SYNTHESIZED ANSWER</div>
+              <div class="answer-text">
+                Internal Phase II data shows efficacy of <strong style="color:var(--white)">61%</strong> under the revised 2023 dosing protocol
+                <span class="answer-cite">Study C, p.8</span>, an improvement over the 42% reported in 2019
+                <span class="answer-cite">Study A, p.14</span>. The methodological shift is detailed in the 2023 protocol amendment
+                <span class="answer-cite">Amendment B, p.3</span>.
+              </div>
+              <div class="confidence-row">
+                <span class="conf-label">Confidence</span>
+                <span class="conf-badge">HIGH</span>
+                <div class="conf-bars">
+                  <div class="conf-bar filled"></div>
+                  <div class="conf-bar filled"></div>
+                  <div class="conf-bar filled"></div>
+                  <div class="conf-bar filled"></div>
+                  <div class="conf-bar"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 6 -->
+      <div class="pipeline-step">
+        <div class="step-num-wrap">
+          <div class="step-num">06</div>
+        </div>
+        <div class="step-content">
+          <div class="step-tag">Trust Layer</div>
+          <h3 class="step-name">Full Traceability<br>& Audit Trail</h3>
+          <p class="step-desc">Every answer exposes its full evidence chain. Inline citations link directly to the exact document page. Legal users get an immutable audit log and one-click PDF export. Researchers can expand the full trace — from query to retrieved chunk to final answer.</p>
+          <div class="step-pills">
+            <span class="pill accent">Inline citations</span>
+            <span class="pill accent">Full trace view</span>
+            <span class="pill">Immutable audit log</span>
+            <span class="pill">PDF export</span>
+            <span class="pill">7-year retention</span>
+          </div>
+        </div>
+        <div class="step-visual">
+          <div class="visual-card">
+            <div class="visual-card-label">Full trace — query → evidence chain → answer</div>
+            <div style="font-family:'DM Mono',monospace;font-size:10px;line-height:2;color:var(--gray-600);">
+              <div><span style="color:var(--yellow)">QUERY</span> → "Compound X Phase II efficacy"</div>
+              <div style="padding-left:16px;border-left:1px solid #2a2a2a;margin:4px 0;">
+                <div><span style="color:#888">RETRIEVED</span> study_2023.pdf p.8 <span style="color:var(--yellow)">sim=0.94</span></div>
+                <div><span style="color:#888">RETRIEVED</span> study_2019.pdf p.14 <span style="color:var(--yellow)">sim=0.81</span></div>
+                <div><span style="color:#888">RETRIEVED</span> amendment_b.pdf p.3 <span style="color:var(--yellow)">sim=0.76</span></div>
+                <div style="color:var(--yellow);margin-top:4px;">⚠ CONFLICT DETECTED (2019 vs 2023)</div>
+              </div>
+              <div style="padding-left:16px;border-left:1px solid #2a2a2a;margin:4px 0;">
+                <div><span style="color:#888">LLM INPUT</span> 3 chunks + conflict flag</div>
+                <div><span style="color:#888">SYSTEM PROMPT</span> citation-enforced</div>
+              </div>
+              <div><span style="color:#00ff88">✓ ANSWER</span> generated · 3 citations · HIGH confidence</div>
+              <div><span style="color:#888">LOGGED</span> user_id · timestamp · session</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- HORIZONTAL FLOW SUMMARY -->
+<section class="flow-section">
+  <div class="flow-container">
+    <div class="reveal">
+      <p class="section-label">At a glance</p>
+      <h2 class="section-title">The <em>complete flow.</em></h2>
+    </div>
+    <div class="flow-diagram reveal" style="transition-delay:0.2s">
+      <div class="flow-node">
+        <div class="flow-box">
+          <div class="flow-box-top">01</div>
+          <div class="flow-box-name">User Query</div>
+          <div class="flow-box-sub">Natural language<br>no syntax required</div>
+        </div>
+        <div class="flow-label">NLQ Interface</div>
+      </div>
+      <div class="flow-node">
+        <div class="flow-box">
+          <div class="flow-box-top">02</div>
+          <div class="flow-box-name">Embed Query</div>
+          <div class="flow-box-sub">1536-dim vector<br>semantic meaning</div>
+        </div>
+        <div class="flow-label">Embedding Model</div>
+      </div>
+      <div class="flow-node">
+        <div class="flow-box">
+          <div class="flow-box-top">03</div>
+          <div class="flow-box-name">Retrieve Chunks</div>
+          <div class="flow-box-sub">Top-N by similarity<br>+ recency weight</div>
+        </div>
+        <div class="flow-label">Vector DB</div>
+      </div>
+      <div class="flow-node">
+        <div class="flow-box flow-box-accent">
+          <div class="flow-box-top">04</div>
+          <div class="flow-box-name">Detect Conflicts</div>
+          <div class="flow-box-sub">Compare claims<br>rank by recency</div>
+        </div>
+        <div class="flow-label" style="color:var(--yellow)">★ Differentiator</div>
+      </div>
+      <div class="flow-node">
+        <div class="flow-box">
+          <div class="flow-box-top">05</div>
+          <div class="flow-box-name">Synthesize</div>
+          <div class="flow-box-sub">Citation-enforced<br>LLM generation</div>
+        </div>
+        <div class="flow-label">GPT-4o / Sonnet</div>
+      </div>
+      <div class="flow-node">
+        <div class="flow-box">
+          <div class="flow-box-top">06</div>
+          <div class="flow-box-name">Cited Answer</div>
+          <div class="flow-box-sub">Inline links<br>full trace · audit</div>
+        </div>
+        <div class="flow-label">Output Layer</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURE CARDS -->
+<section class="features-section">
+  <div class="reveal">
+    <p class="section-label">Core Capabilities</p>
+    <h2 class="section-title">Built for research.<br><em>Trusted by legal.</em></h2>
+  </div>
+  <div class="features-grid reveal" style="transition-delay:0.2s">
+    <div class="feature-card">
+      <div class="feature-num">F-01</div>
+      <span class="feature-icon">🔍</span>
+      <div class="feature-name">Natural Language Query</div>
+      <p class="feature-desc">Ask anything in plain English. No Boolean logic, no training, no syntax. The system understands intent, not just keywords.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-num">F-02</div>
+      <span class="feature-icon">🔗</span>
+      <div class="feature-name">Inline Citations</div>
+      <p class="feature-desc">Every claim links to the exact document, page, and passage. Structurally enforced — the model cannot generate an uncited fact.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-num">F-03</div>
+      <span class="feature-icon">⚡</span>
+      <div class="feature-name">Confidence Scoring</div>
+      <p class="feature-desc">High / Medium / Low confidence on every answer, derived from retrieval similarity scores. Low confidence auto-flags for human review.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-num">F-04</div>
+      <span class="feature-icon" style="filter:none">★</span>
+      <div class="feature-name">Contradiction Detection</div>
+      <p class="feature-desc">Conflicting evidence across studies is surfaced automatically, ranked by recency. The most recent finding is labeled. No silent averaging.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-num">F-05</div>
+      <span class="feature-icon">🕓</span>
+      <div class="feature-name">Recency Weighting</div>
+      <p class="feature-desc">Newer documents rank higher when semantic similarity is equal. Document date is a first-class signal, not an afterthought.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-num">F-06</div>
+      <span class="feature-icon">🔐</span>
+      <div class="feature-name">Full Audit Trail</div>
+      <p class="feature-desc">Immutable query logs for legal users. One-click PDF export with citations and metadata. 7-year retention. Every answer is defensible.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="divider"></div>
+<div class="cta-section reveal">
+  <h2 class="cta-title">
+    Ready to stop<br><em>searching</em> and start<br>knowing?
+  </h2>
+  <button class="cta-btn">
+    View Full PRD <span class="cta-arrow">↗</span>
+  </button>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <span class="footer-copy">© 2026 Tenex. Strategic Synthesis Engine for MediGen Corp.</span>
+  <span class="footer-tag">tenex.co · human@tenex.co</span>
+</footer>
+
+<script>
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll('.reveal, .pipeline-step').forEach(el => observer.observe(el));
+
+  // Stagger pipeline steps
+  document.querySelectorAll('.pipeline-step').forEach((step, i) => {
+    step.style.transitionDelay = `${i * 0.1}s`;
+  });
+</script>
+</body>
+</html>
