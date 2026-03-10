@@ -552,19 +552,28 @@ input[type="range"]::-moz-range-thumb {
   .metrics-grid { grid-template-columns: 1fr; }
   .metric-card.primary { grid-column: 1; }
 }
+.nav-links { display:flex; gap:4px; }
+.nav-link { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:#666; text-decoration:none; padding:7px 14px; border-radius:4px; transition:color 0.2s, background 0.2s; }
+.nav-link:hover { color:#fff; background:#161600; }
+.nav-active { color:#0A0A0A !important; background:#F0D800 !important; font-weight:600; }
+.nav-cta { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:#0A0A0A; background:#F0D800; padding:8px 16px; border-radius:4px; text-decoration:none; transition:background 0.2s; }
+.nav-cta:hover { background:#fff; }
 </style>
 </head>
 <body>
 
 <!-- NAV -->
 <nav>
-  <a class="logo" href="#">
-    <div class="logo-mark">
-      <span></span><span></span><span></span><span></span>
-    </div>
+  <a class="logo" href="tenex-rag.html">
+    <div class="logo-mark"><span></span><span></span><span></span><span></span></div>
     Tenex
   </a>
-  <span class="nav-right">SSE — ROI Calculator</span>
+  <div class="nav-links">
+    <a href="tenex-rag.html" class="nav-link">RAG Architecture</a>
+    <a href="tenex-mvp-roadmap.html" class="nav-link">Roadmap</a>
+    <a href="tenex-roi.html" class="nav-link nav-active">ROI Calculator</a>
+  </div>
+  <a class="nav-cta" href="PRD_Tenex.pdf" target="_blank">View PRD ↗</a>
 </nav>
 
 <!-- HERO -->
